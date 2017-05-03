@@ -9,19 +9,12 @@ class App extends Component {
     super(props);
     this.state = {
       currentUser: {name: "Bob"},
-      messages: [
-        {
-          id: 1,
-          username: "Bob",
-          content: "Has anyone seen my marbles?",
-        },
-        {
-          id: 2,
-          username: "Anonymous",
-          content: "No, I think you lost them. You lost your marbles Bob. You lost them for good."
-        }
-      ]
+      messages: []
     };
+  }
+
+  changeName = (event) => {
+    this.setState({currentUser: {name: event.target.value}});
   }
 
   handleKeyPress = (event) => {
@@ -29,14 +22,13 @@ class App extends Component {
       // debugger;
       const inputUser = event.target.previousSibling.value;
       const inputContent = event.target.value;
-
       const newMessage = {
         id : this.state.messages.length + 1,
         username : inputUser,
         content: inputContent
       };
-
-      const messages = this.state.messages.concat(newMessage)
+      const messages = this.state.messages.concat(newMessage);
+      let wsMessage;
 
       switch (inputUser) {
         case "" :
@@ -45,39 +37,58 @@ class App extends Component {
             username : "Anonymous",
             content: inputContent
           };
-
           const anonmessages = this.state.messages.concat(anonMessage);
 
           this.setState({currentUser: {name: "Anonymous"}});
           this.setState({messages: anonmessages});
+
+          wsMessage = {
+            username: "Anonymous",
+            content: inputContent
+          }
+          this.ws.send(JSON.stringify(wsMessage));
           break;
         case this.state.currentUser.name :
           this.setState({messages: messages});
+          wsMessage = {
+            username: inputUser,
+            content: inputContent
+          }
+          this.ws.send(JSON.stringify(wsMessage));
           break;
         default :
           this.setState({currentUser: {name:inputUser}});
+          wsMessage = {
+            username: inputUser,
+            content: inputContent
+          }
+          this.ws.send(JSON.stringify(wsMessage));
           this.setState({messages: messages});
       }
+      // debugger;
+      event.target.value='';
     }
   }
 
 
+
   componentDidMount() {
-  setTimeout(() => {
-    // Add a new message to the list of messages in the data store
-    const newMessage = {id: 3, username: "Michelle", content: "Hello there!"};
-    const messages = this.state.messages.concat(newMessage)
-    // Update the state of the app component.
-    // Calling setState will trigger a call to render() in App and all child components.
-    this.setState({messages: messages})
-  }, 3000);
-}
+    this.ws = new WebSocket("ws://localhost:3001");
+   // const ws = new WebSocket("ws://localhost:3001");
+    this.ws.onmessage = (rawMessage) => {
+      // const message = JSON.parse(rawMessage);
+      const concatMessage = this.state.messages.concat(JSON.parse(rawMessage.data));
+      this.setState({messages: concatMessage});
+      console.log(concatMessage);
+    }
+  }
+
   render() {
     return (
       <div>
         <Nav/>
         <MessageList messages={this.state.messages}/>
-        <ChatBar onHandleKeyPress={this.handleKeyPress} user={this.state.currentUser}/>
+        <ChatBar changeName={this.changeName} onHandleKeyPress={this.handleKeyPress} user={this.state.currentUser}/>
       </div>
     );
   }
