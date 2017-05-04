@@ -13,9 +13,9 @@ class App extends Component {
     };
   }
 
-  changeName = (event) => {
-    this.setState({currentUser: {name: event.target.value}});
-  }
+  // changeName = (event) => {
+  //   this.setState({currentUser: {name: event.target.value}});
+  // }
 
   handleKeyPress = (event) => {
     if(event.key == 'Enter'){
@@ -73,13 +73,13 @@ class App extends Component {
 
 
   componentDidMount() {
-    this.ws = new WebSocket("ws://localhost:3001");
+    this.ws = new WebSocket("ws://172.46.1.31:3001");
    // const ws = new WebSocket("ws://localhost:3001");
     this.ws.onmessage = (rawMessage) => {
       // const message = JSON.parse(rawMessage);
       const concatMessage = this.state.messages.concat(JSON.parse(rawMessage.data));
       this.setState({messages: concatMessage});
-      console.log(concatMessage);
+      // console.log(concatMessage);
     }
   }
 
@@ -88,9 +88,10 @@ class App extends Component {
       <div>
         <Nav/>
         <MessageList messages={this.state.messages}/>
-        <ChatBar changeName={this.changeName} onHandleKeyPress={this.handleKeyPress} user={this.state.currentUser}/>
+        <ChatBar onHandleKeyPress={this.handleKeyPress} user={this.state.currentUser}/>
       </div>
     );
   }
+        // changeName={this.changeName}
 }
 export default App;

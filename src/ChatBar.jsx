@@ -5,11 +5,11 @@ class ChatBar extends Component {
   render(){
     return(
       <footer className="chatbar">
-        <input className="chatbar-username" value={this.props.user.name} onChange={this.props.changeName} />
+        <input className="chatbar-username" placeholder={this.props.user.name} />
         <input onKeyPress={this.props.onHandleKeyPress} className="chatbar-message" placeholder="Type a message and hit ENTER" />
       </footer>
     )
   }
-
+// onChange={this.props.changeName}
 }
 export default ChatBar
