@@ -29,9 +29,7 @@ wss.on('connection', (ws) => {
       content : JSON.parse(data).content
     }
     wss.clients.forEach((client) => {
-      if (client !== ws) {
         client.send(JSON.stringify(messageOut));
-      }
     })
     console.log(messageOut);
   });
