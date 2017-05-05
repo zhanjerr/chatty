@@ -45,9 +45,12 @@ class App extends Component {
     this.ws.onmessage = (rawMessage) => {
       console.log(JSON.parse(rawMessage.data));
       const message = JSON.parse(rawMessage.data);
+      const concatMessage = this.state.messages.concat(message);
       switch(message.type){
-        case 'incomingNotification' || 'incomingMessage':
-          const concatMessage = this.state.messages.concat(message);
+        case 'incomingNotification':
+          this.setState({messages: concatMessage});
+          break;
+        case 'incomingMessage':
           this.setState({messages: concatMessage});
           break;
         case 'userCount':
@@ -59,6 +62,8 @@ class App extends Component {
       }
     }
   }
+
+
 
   render() {
     return (
