@@ -9,7 +9,8 @@ class App extends Component {
     super(props);
     this.state = {
       currentUser: {name: "Anonymous"},
-      messages: []
+      messages: [],
+      connectedUsers: 0
     };
 
     this.handleNewName = this.handleNewName.bind(this);
@@ -17,82 +18,52 @@ class App extends Component {
   }
 
   handleNewName(name) {
-    this.setState({currentUser: {name: name}});
+    const newMessage = {
+      type: "postNotification",
+      oldName: this.state.currentUser.name,
+      newName: name
+    };
+    if(name !== this.state.currentUser.name){
+      this.ws.send(JSON.stringify(newMessage));
+      this.setState({currentUser: {name: name}});
+    }
   }
 
   handleNewMessage(message) {
     const newMessage = {
+      type: "postMessage",
       username: this.state.currentUser.name,
       content: message
-    }
+    };
     this.ws.send(JSON.stringify(newMessage));
   }
 
-  // handleNewMessage(event) {
-  //   if(event.key == 'Enter'){
-  //     // debugger;
-  //     const inputUser = event.target.previousSibling.value;
-  //     const inputContent = event.target.value;
-  //     const newMessage = {
-  //       id : this.state.messages.length + 1,
-  //       username : inputUser,
-  //       content: inputContent
-  //     };
-  //     const messages = this.state.messages.concat(newMessage);
-  //     let wsMessage;
-
-  //     switch (inputUser) {
-  //       case "" :
-  //         const anonMessage = {
-  //           id : this.state.messages.length + 1,
-  //           username : "Anonymous",
-  //           content: inputContent
-  //         };
-  //         const anonmessages = this.state.messages.concat(anonMessage);
-
-  //         this.setState({currentUser: {name: "Anonymous"}});
-  //         this.setState({messages: anonmessages});
-
-  //         wsMessage = {
-  //           username: "Anonymous",
-  //           content: inputContent
-  //         }
-  //         this.ws.send(JSON.stringify(wsMessage));
-  //         break;
-  //       case this.state.currentUser.name :
-  //         this.setState({messages: messages});
-  //         wsMessage = {
-  //           username: inputUser,
-  //           content: inputContent
-  //         }
-  //         this.ws.send(JSON.stringify(wsMessage));
-  //         break;
-  //       default :
-  //         this.setState({currentUser: {name:inputUser}});
-  //         wsMessage = {
-  //           username: inputUser,
-  //           content: inputContent
-  //         }
-  //         this.ws.send(JSON.stringify(wsMessage));
-  //         this.setState({messages: messages});
-  //     }
-  //   }
-  // }
-
-
   componentDidMount() {
+    //connecting to websocket
     this.ws = new WebSocket("ws://localhost:3001");
+    //handling incoming message, chaning it to JSON then updating the sate
     this.ws.onmessage = (rawMessage) => {
-      const concatMessage = this.state.messages.concat(JSON.parse(rawMessage.data));
-      this.setState({messages: concatMessage});
+      console.log(JSON.parse(rawMessage.data));
+      const message = JSON.parse(rawMessage.data);
+      switch(message.type){
+        case 'incomingNotification' || 'incomingMessage':
+          const concatMessage = this.state.messages.concat(message);
+          this.setState({messages: concatMessage});
+          break;
+        case 'userCount':
+          console.log('should update userCount');
+          this.setState({connectedUsers: message.userCount});
+          break;
+        default:
+          throw new Error('Unknown message type');
+      }
     }
   }
 
   render() {
-    console.log(this.state);
     return (
       <div>
-        <Nav/>
+        <Nav userCount={this.state.connectedUsers}/>
         <MessageList messages={this.state.messages}/>
         <ChatBar submitName={this.handleNewName} submitMessage={this.handleNewMessage} user={this.state.currentUser.name}/>
       </div>

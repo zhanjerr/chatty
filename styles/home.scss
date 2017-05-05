@@ -7,7 +7,7 @@ body {
 }
 
 .chatbar {
-  background: tomato;
+  background: #B19CD9;
   border-top: 1px solid black;
   bottom: 0;
   display: flex;
@@ -29,10 +29,12 @@ body {
 
 .chatbar-message {
   flex: 8;
+  border-radius: 5px;
 }
 
 .chatbar-username {
   flex: 2;
+  border-radius: 5px;
 }
 
 .message {
@@ -62,7 +64,7 @@ body {
 }
 
 .navbar {
-  background: tomato;
+  background: #B39EB5;
   border-bottom: 1px solid black;
   height: 60px;
   left: 0;
@@ -82,4 +84,10 @@ body {
   line-height: 60px;
   padding: 0 10px;
   text-decoration: none;
+}
+
+.userCount{
+  float: right;
+  font-size: 1.5em;
+  line-height: 60px
 }
